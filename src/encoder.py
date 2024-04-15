@@ -34,8 +34,3 @@ def text_to_binary(filename):
     #     output_file.write(binary_data)
 
     return binary_data
-
-
-NAME = "assets/test_text.txt"  # Replace with your text file's name
-binary_content = text_to_binary(NAME)
-print(binary_content)
