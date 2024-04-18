@@ -1,5 +1,12 @@
 from PIL import Image as img
 
+IMG_WIDTH = 10
+IMG_HEIGHT = 3
+img_index = 0
+COLOR_MAP = {
+        "0": (0, 0, 0),   # Black
+        "1": (255, 255, 255)  # White
+    }
 
 def text_to_binary(filename):
     """
@@ -31,7 +38,7 @@ def text_to_binary(filename):
         print(f"An error occurred: {e}")
         return
 
-    binary_data = " ".join(format(ord(char), "08b") for char in text)
+    binary_data = "".join(format(ord(char), "08b") for char in text)
 
     filename = filename.split("/")[-1].split(".")[0]
     with open(f"results/binary/{filename}_binary.txt", "w") as output_file:
@@ -64,3 +71,32 @@ def binary_to_png(binary_data, output_filename, image_width):
     image.putdata(pixel_data)
 
     image.save(f"results/image/{output_filename}", "PNG")
+
+
+def create_png_from_binary(binary_data, output_file, img_index=0):
+
+    # Create a new image with the specified width and height
+    im = img.new(mode = 'RGB', size = (IMG_WIDTH, IMG_HEIGHT), color = (207, 255, 4))
+    data_end = False
+    # Iterate through each tile and set pixel values based on the color map
+    counter = 0
+    #print(binary_data[:IMG_HEIGHT*IMG_WIDTH])
+    for y in range(IMG_HEIGHT):
+        for x in range(IMG_WIDTH):
+            counter += 1
+            try:
+                im.putpixel((x,y), COLOR_MAP[binary_data[IMG_WIDTH*y + x]])
+                #print(f"I just printed a {COLOR_MAP[binary_data[IMG_WIDTH*y + x]]} tile on {x,y} and my num is {binary_data[IMG_WIDTH*y + x]}")
+            except IndexError:
+                print(f"I've finished. My x is {x} and my y is {y}")
+                data_end = True
+                break
+        if data_end:
+            break
+
+    # Save the image as a PNG file
+    im.save(f"results/image/{img_index}{output_file}", "PNG")
+    if len(binary_data) > IMG_HEIGHT*IMG_WIDTH:
+        print(f"I didn't finish my data and I'm on {img_index}")
+        img_index += 1
+        create_png_from_binary(binary_data[:IMG_HEIGHT*IMG_WIDTH], output_file, img_index)
