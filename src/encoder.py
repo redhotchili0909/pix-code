@@ -1,7 +1,7 @@
 from PIL import Image as img
 
-IMG_WIDTH = 10
-IMG_HEIGHT = 3
+IMG_WIDTH = 1920
+IMG_HEIGHT = 1080
 img_index = 0
 COLOR_MAP = {
         "0": (0, 0, 0),   # Black
@@ -47,36 +47,23 @@ def text_to_binary(filename):
     return binary_data
 
 
-def binary_to_png(binary_data, output_filename, image_width):
+def create_png_from_binary(binary_data, output_file, img_index=0):
     """
     Convert binary data to a PNG image file.
 
     This function takes a string of binary data, converts it into pixel values,
-    and saves it as a PNG image. Each byte (8 bits) in the binary data is treated
-    as one pixel in a grayscale image.
+    and saves it into PNG images of a given size until it runs out of data. Each 
+    bit in the binary data is treated as one pixel in a black and white image.
 
     Parameters:
     binary_data (str): A string of binary data separated by spaces.
     output_filename (str): Filename for the output PNG image.
-    image_width (int): The width of the image in pixels.
+    img_index (int) : An integer index for the PNG
 
     """
-    pixel_data = [int(b, 2) for b in binary_data.split()]
-
-    image_height = len(pixel_data) // image_width
-    if len(pixel_data) % image_width != 0:
-        image_height += 1
-
-    image = img.new("L", (image_width, image_height))
-    image.putdata(pixel_data)
-
-    image.save(f"results/image/{output_filename}", "PNG")
-
-
-def create_png_from_binary(binary_data, output_file, img_index=0):
 
     # Create a new image with the specified width and height
-    im = img.new(mode = 'RGB', size = (IMG_WIDTH, IMG_HEIGHT), color = (207, 255, 4))
+    im = img.new(mode = 'RGB', size = (IMG_WIDTH, IMG_HEIGHT), color = (74,65,42))
     data_end = False
     # Iterate through each tile and set pixel values based on the color map
     counter = 0
@@ -97,6 +84,5 @@ def create_png_from_binary(binary_data, output_file, img_index=0):
     # Save the image as a PNG file
     im.save(f"results/image/{img_index}{output_file}", "PNG")
     if len(binary_data) > IMG_HEIGHT*IMG_WIDTH:
-        print(f"I didn't finish my data and I'm on {img_index}")
-        img_index += 1
-        create_png_from_binary(binary_data[:IMG_HEIGHT*IMG_WIDTH], output_file, img_index)
+        print(f"creating {output_file}{img_index} ...")
+        create_png_from_binary(binary_data[IMG_HEIGHT*IMG_WIDTH:], output_file, img_index + 1)
