@@ -7,3 +7,8 @@ binary_frankenstein = text_to_binary(FRANKENSTEIN)
 print(f"I should create {len(binary_frankenstein) // (1920*1080)} images with {len(binary_frankenstein) % (1920*1080)} leftover binary")
 create_png_from_binary(binary_frankenstein, "frankenstein.png")
 #create_colored_png_from_binary(binary_content, "grayscalelorem.png")
+from encoder import Encoder
+
+bee = Encoder("assets/bee.txt")
+bee.create_png_from_binary("bee")
+bee.generate_video("bee", 1)
