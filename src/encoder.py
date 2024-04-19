@@ -75,7 +75,7 @@ def create_png_from_binary(binary_data, output_file, img_index=0):
                 im.putpixel((x,y), COLOR_MAP[binary_data[IMG_WIDTH*y + x]])
                 #print(f"I just printed a {COLOR_MAP[binary_data[IMG_WIDTH*y + x]]} tile on {x,y} and my num is {binary_data[IMG_WIDTH*y + x]}")
             except IndexError:
-                print(f"I've finished. My x is {x} and my y is {y}")
+                print(f"I've finished. My x is {x} and my y is {y} and the counter is {counter}")
                 data_end = True
                 break
         if data_end:
@@ -86,3 +86,60 @@ def create_png_from_binary(binary_data, output_file, img_index=0):
     if len(binary_data) > IMG_HEIGHT*IMG_WIDTH:
         print(f"creating {output_file}{img_index} ...")
         create_png_from_binary(binary_data[IMG_HEIGHT*IMG_WIDTH:], output_file, img_index + 1)
+
+    # remaining_data = binary_data[IMG_HEIGHT*IMG_WIDTH:]
+    # if remaining_data:
+    #     print(f"creating {output_file}{img_index} ...")
+    #     create_png_from_binary(remaining_data, output_file, img_index + 1)
+
+
+def create_colored_png_from_binary(binary_data, output_file, img_index=0):
+    """
+    Convert binary data to a PNG image file.
+
+    This function takes a string of binary data, converts it into pixel values,
+    and saves it into PNG images of a given size until it runs out of data. Each 
+    byte in the binary data is treated as one pixel in a black and white image.
+
+    Parameters:
+    binary_data (str): A string of binary data separated by spaces.
+    output_filename (str): Filename for the output PNG image.
+    img_index (int) : An integer index for the PNG
+    """
+
+    # Define constants
+    BYTE_SIZE = 8  # Number of bits in a byte
+
+    # Calculate the number of bytes needed for one image
+    bytes_per_image = IMG_HEIGHT * IMG_WIDTH // BYTE_SIZE
+
+    # Create a new image with the specified width and height
+    im = img.new(mode='RGB', size=(IMG_WIDTH, IMG_HEIGHT), color=(74, 65, 42))
+
+    # Iterate through each byte of binary data
+    for byte_index in range(bytes_per_image):
+        # Calculate the start and end index for this byte in the binary data
+        start_index = byte_index * BYTE_SIZE
+        end_index = (byte_index + 1) * BYTE_SIZE
+
+        # Extract one byte from the binary data
+        byte = binary_data[start_index:end_index]
+
+        # Convert the byte to an integer value
+        pixel_value = int(byte, 2)
+
+        # Calculate the pixel coordinates
+        y = byte_index // IMG_WIDTH
+        x = byte_index % IMG_WIDTH
+
+        # Set the pixel value in the image
+        im.putpixel((x, y), (255-pixel_value, pixel_value, pixel_value))
+
+    # Save the image as a PNG file
+    im.save(f"results/image/{img_index}_{output_file}", "PNG")
+
+    # If there is more binary data remaining, recursively call the function for the next image
+    remaining_data = binary_data[bytes_per_image * BYTE_SIZE:]
+    if remaining_data:
+        create_colored_png_from_binary(remaining_data, output_file, img_index + 1)
+
