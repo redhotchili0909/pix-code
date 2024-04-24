@@ -1,21 +1,21 @@
 import os
-from PIL import Image
+from PIL import Image, ImageDraw
 import cv2
 
 
 class Encoder:
-    def __init__(self, filepath):
-        self.filepath = filepath
-        self.img_width = 1920
-        self.img_height = 1080
+    def __init__(self, binary_data=None, img_width=1920, img_height=1080):
         self.color_map = {
             "0": (0, 0, 0),
             "1": (255, 255, 255),
         }  # Black for '0', White for '1'
-        self.binary_data = None
-        self.text_to_binary()
+        self.img_width = img_width
+        self.img_height = img_height
+        self.binary_data = binary_data
+        if self.binary_data is None:
+            self.text_to_binary()
 
-    def text_to_binary(self):
+    def text_to_binary(self, filepath):
         """
         Convert the text content of a file to a binary string.
 
@@ -36,7 +36,7 @@ class Encoder:
         Exception: For other issues that may arise during file reading.
         """
         try:
-            with open(self.filepath, "r", encoding="utf-8") as file:
+            with open(filepath, "r", encoding="utf-8") as file:
                 text = file.read()
             self.binary_data = "".join(format(ord(char), "08b") for char in text)
         except FileNotFoundError:
@@ -46,7 +46,7 @@ class Encoder:
             print(f"An error occurred: {e}")
             raise
 
-    def create_png_from_binary(self, output_folder):
+    def create_png_from_binary(self, output_folder, BLOCK_SIZE):
         """
         Convert binary data to a PNG image file.
 
@@ -60,27 +60,33 @@ class Encoder:
         img_index (int) : An integer index for the PNG
 
         """
+
         if self.binary_data is None:
             raise ValueError("Binary data is not generated yet.")
+        
 
-        binary_data = self.binary_data
         img_index = 0
         directory = f"results/imgs/{output_folder}"
         os.makedirs(directory, exist_ok=True)
+        img_bit_width = self.img_width//BLOCK_SIZE
+        img_bit_height = self.img_height//BLOCK_SIZE
 
-        while binary_data:
-            img = Image.new("RGB", (self.img_width, self.img_height), (74, 65, 42))
-            for y in range(self.img_height):
-                for x in range(self.img_width):
-                    if y * self.img_width + x >= len(binary_data):
-                        img.save(f"{directory}/{img_index}.png", "PNG")
-                        return
-                    img.putpixel(
-                        (x, y), self.color_map[binary_data[y * self.img_width + x]]
-                    )
-            img.save(f"{directory}/{img_index}.png", "PNG")
-            img_index += 1
-            binary_data = binary_data[self.img_width * self.img_height :]
+        img = Image.new(mode = 'RGB', size = (self.img_width, self.img_height), color = (74,65,42))
+
+        drawable_img = ImageDraw.Draw(img)
+
+        for y in range(img_bit_height):
+            for x in range(img_bit_width):
+                if y * img_bit_width + x >= len(self.binary_data):
+                    img.save(f"{directory}/{img_index}.png", "PNG")
+                    return
+                drawable_img.rectangle([(x*BLOCK_SIZE, y*BLOCK_SIZE), 
+                                        (x*BLOCK_SIZE + BLOCK_SIZE, y*BLOCK_SIZE + BLOCK_SIZE)], 
+                                        fill=self.color_map[self.binary_data[y * img_bit_width + x]])
+        img.save(f"{directory}/{img_index}.png", "PNG")
+        img_index += 1
+        self.binary_data = self.binary_data[img_bit_width * img_bit_height :]
+    
 
     def generate_video(self, directory, frame_rate):
         """
@@ -101,8 +107,8 @@ class Encoder:
         FileNotFoundError: If the specified directory does not contain the images.
         Exception: For issues that may arise during video file creation.
         """
-        output_video_path = f"results/vids/{directory}.mp4"
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        output_video_path = f"results/vids/{directory}.avi"
+        fourcc = cv2.VideoWriter_fourcc(*"ffv1")
         first_image_path = f"results/imgs/{directory}/0.png"
         frame = cv2.imread(first_image_path)
 
@@ -126,117 +132,3 @@ class Encoder:
 
         video.release()
         print(f"Video of {directory} created successfully.")
-
-    # remaining_data = binary_data[IMG_HEIGHT*IMG_WIDTH:]
-    # if remaining_data:
-    #     print(f"creating {output_file}{img_index} ...")
-    #     create_png_from_binary(remaining_data, output_file, img_index + 1)
-
-
-def create_colored_png_from_binary(binary_data, output_file, img_index=0):
-    """
-    Convert binary data to a PNG image file.
-
-    This function takes a string of binary data, converts it into pixel values,
-    and saves it into PNG images of a given size until it runs out of data. Each 
-    byte in the binary data is treated as one pixel in a black and white image.
-
-    Parameters:
-    binary_data (str): A string of binary data separated by spaces.
-    output_filename (str): Filename for the output PNG image.
-    img_index (int) : An integer index for the PNG
-    """
-
-    # Define constants
-    BYTE_SIZE = 8  # Number of bits in a byte
-
-    # Calculate the number of bytes needed for one image
-    bytes_per_image = IMG_HEIGHT * IMG_WIDTH // BYTE_SIZE
-
-    # Create a new image with the specified width and height
-    im = img.new(mode='RGB', size=(IMG_WIDTH, IMG_HEIGHT), color=(74, 65, 42))
-
-    # Iterate through each byte of binary data
-    for byte_index in range(bytes_per_image):
-        # Calculate the start and end index for this byte in the binary data
-        start_index = byte_index * BYTE_SIZE
-        end_index = (byte_index + 1) * BYTE_SIZE
-
-        # Extract one byte from the binary data
-        byte = binary_data[start_index:end_index]
-
-        # Convert the byte to an integer value
-        pixel_value = int(byte, 2)
-
-        # Calculate the pixel coordinates
-        y = byte_index // IMG_WIDTH
-        x = byte_index % IMG_WIDTH
-
-        # Set the pixel value in the image
-        im.putpixel((x, y), (255-pixel_value, pixel_value, pixel_value))
-
-    # Save the image as a PNG file
-    im.save(f"results/image/{img_index}_{output_file}", "PNG")
-
-    # If there is more binary data remaining, recursively call the function for the next image
-    remaining_data = binary_data[bytes_per_image * BYTE_SIZE:]
-    if remaining_data:
-        create_colored_png_from_binary(remaining_data, output_file, img_index + 1)
-
-
-    # remaining_data = binary_data[IMG_HEIGHT*IMG_WIDTH:]
-    # if remaining_data:
-    #     print(f"creating {output_file}{img_index} ...")
-    #     create_png_from_binary(remaining_data, output_file, img_index + 1)
-
-
-def create_colored_png_from_binary(binary_data, output_file, img_index=0):
-    """
-    Convert binary data to a PNG image file.
-
-    This function takes a string of binary data, converts it into pixel values,
-    and saves it into PNG images of a given size until it runs out of data. Each 
-    byte in the binary data is treated as one pixel in a black and white image.
-
-    Parameters:
-    binary_data (str): A string of binary data separated by spaces.
-    output_filename (str): Filename for the output PNG image.
-    img_index (int) : An integer index for the PNG
-    """
-
-    # Define constants
-    BYTE_SIZE = 8  # Number of bits in a byte
-
-    # Calculate the number of bytes needed for one image
-    bytes_per_image = IMG_HEIGHT * IMG_WIDTH // BYTE_SIZE
-
-    # Create a new image with the specified width and height
-    im = img.new(mode='RGB', size=(IMG_WIDTH, IMG_HEIGHT), color=(74, 65, 42))
-
-    # Iterate through each byte of binary data
-    for byte_index in range(bytes_per_image):
-        # Calculate the start and end index for this byte in the binary data
-        start_index = byte_index * BYTE_SIZE
-        end_index = (byte_index + 1) * BYTE_SIZE
-
-        # Extract one byte from the binary data
-        byte = binary_data[start_index:end_index]
-
-        # Convert the byte to an integer value
-        pixel_value = int(byte, 2)
-
-        # Calculate the pixel coordinates
-        y = byte_index // IMG_WIDTH
-        x = byte_index % IMG_WIDTH
-
-        # Set the pixel value in the image
-        im.putpixel((x, y), (255-pixel_value, pixel_value, pixel_value))
-
-    # Save the image as a PNG file
-    im.save(f"results/image/{img_index}_{output_file}", "PNG")
-
-    # If there is more binary data remaining, recursively call the function for the next image
-    remaining_data = binary_data[bytes_per_image * BYTE_SIZE:]
-    if remaining_data:
-        create_colored_png_from_binary(remaining_data, output_file, img_index + 1)
-
