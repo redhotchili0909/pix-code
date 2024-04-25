@@ -4,7 +4,7 @@ import cv2
 
 
 class Encoder:
-    def __init__(self, binary_data=None, img_width=1920, img_height=1080):
+    def __init__(self, filepath=None, binary_data=None, img_width=1920, img_height=1080, ):
         self.color_map = {
             "0": (0, 0, 0),
             "1": (255, 255, 255),
@@ -12,8 +12,8 @@ class Encoder:
         self.img_width = img_width
         self.img_height = img_height
         self.binary_data = binary_data
-        if self.binary_data is None:
-            self.text_to_binary()
+        if self.binary_data is None and self.filepath is not None:
+            self.text_to_binary(filepath)
 
     def text_to_binary(self, filepath):
         """
