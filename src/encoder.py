@@ -23,10 +23,11 @@ class Encoder:
         self.img_width = img_width
         self.img_height = img_height
         self.binary_data = binary_data
+        self.filepath = filepath
         if self.binary_data is None and self.filepath is not None:
-            self.text_to_binary(filepath)
+            self.text_to_binary()
 
-    def text_to_binary(self, filepath):
+    def text_to_binary(self):
         """
         Convert the text content of a file to a binary string.
 
@@ -47,7 +48,7 @@ class Encoder:
         Exception: For other issues that may arise during file reading.
         """
         try:
-            with open(filepath, "r", encoding="utf-8") as file:
+            with open(self.filepath, "r", encoding="utf-8") as file:
                 text = file.read()
             self.binary_data = "".join(format(ord(char), "08b") for char in text)
         except FileNotFoundError:
@@ -71,7 +72,37 @@ class Encoder:
         img_index (int) : An integer index for the PNG
 
         """
-        if self.binary_data is None:
+        # if self.binary_data is None:
+        #     raise ValueError("Binary data is not generated yet.")
+        
+        # directory = f"results/imgs/{output_folder}"
+        # os.makedirs(directory, exist_ok=True)
+        # img_bit_width = self.img_width//BLOCK_SIZE
+        # img_bit_height = self.img_height//BLOCK_SIZE
+
+        # img = Image.new(mode = 'RGB', size = (self.img_width, self.img_height), color = (74,65,42))
+
+        # drawable_img = ImageDraw.Draw(img)
+
+        # for y in range(img_bit_height):
+        #     for x in range(img_bit_width):
+        #         if y * img_bit_width + x >= len(self.binary_data):
+        #             print("im here in this if statement")
+        #             img.save(f"{directory}/{img_index}.png", "PNG")
+        #             return
+        #         print(f"Placing {self.binary_data[y * img_bit_width + x]} block " +
+        #               f"at {(x*BLOCK_SIZE, y*BLOCK_SIZE), (x*BLOCK_SIZE + BLOCK_SIZE - 1, y*BLOCK_SIZE + BLOCK_SIZE - 1)}")
+        #         drawable_img.rectangle([(x*BLOCK_SIZE, y*BLOCK_SIZE), 
+        #                                 (x*BLOCK_SIZE + BLOCK_SIZE - 1, y*BLOCK_SIZE + BLOCK_SIZE - 1)], 
+        #                                 fill=self.color_map[self.binary_data[y * img_bit_width + x]])
+        # img.save(f"{directory}/{img_index}.png", "PNG")
+        # if len(self.binary_data) > img_bit_height*img_bit_width:
+        #     self.binary_data = self.binary_data[img_bit_width * img_bit_height :]
+        #     print(f"creating {output_folder}{img_index} ...")
+        #     self.create_png_from_binary(output_folder, BLOCK_SIZE, img_index + 1)
+
+
+        if self.binary_data is None: 
             raise ValueError("Binary data is not generated yet.")
         
         directory = f"results/imgs/{output_folder}"
@@ -83,71 +114,30 @@ class Encoder:
 
         drawable_img = ImageDraw.Draw(img)
 
+        split_binary_chunks = []
+        for i in range(self.chunk_size, len(self.binary_data) + self.chunk_size, self.chunk_size): 
+            encoding = self.binary_data[i-self.chunk_size:i]
+            while len(encoding) < self.chunk_size:
+                encoding += "0"
+            split_binary_chunks.append(encoding) 
+
         for y in range(img_bit_height):
             for x in range(img_bit_width):
-                if y * img_bit_width + x >= len(self.binary_data):
-                    print("im here in this if statement")
+                if y * img_bit_width + x >= len(self.binary_data) // self.chunk_size:
+                    print(f"Saving image {directory}/{img_index}.png\n")
                     img.save(f"{directory}/{img_index}.png", "PNG")
                     return
-                print(f"Placing {self.binary_data[y * img_bit_width + x]} block " +
-                      f"at {(x*BLOCK_SIZE, y*BLOCK_SIZE), (x*BLOCK_SIZE + BLOCK_SIZE - 1, y*BLOCK_SIZE + BLOCK_SIZE - 1)}")
+                # print(f"Placing {split_binary_chunks[y * img_bit_width + x]} block " +
+                #       f"at {(x*BLOCK_SIZE, y*BLOCK_SIZE), (x*BLOCK_SIZE + BLOCK_SIZE - 1, y*BLOCK_SIZE + BLOCK_SIZE - 1)}")
                 drawable_img.rectangle([(x*BLOCK_SIZE, y*BLOCK_SIZE), 
                                         (x*BLOCK_SIZE + BLOCK_SIZE - 1, y*BLOCK_SIZE + BLOCK_SIZE - 1)], 
-                                        fill=self.color_map[self.binary_data[y * img_bit_width + x]])
+                                        fill=self.color_thresholds[split_binary_chunks[y * img_bit_width + x]])
+        print(f"Saving image {directory}/{img_index}.png")
         img.save(f"{directory}/{img_index}.png", "PNG")
-        if len(self.binary_data) > img_bit_height*img_bit_width:
-            self.binary_data = self.binary_data[img_bit_width * img_bit_height :]
-            print(f"creating {output_folder}{img_index} ...")
+        binary_per_image = img_bit_height*img_bit_width*self.chunk_size
+        if len(self.binary_data) > binary_per_image:
+            self.binary_data = self.binary_data[binary_per_image :]
             self.create_png_from_binary(output_folder, BLOCK_SIZE, img_index + 1)
-
-        # if self.binary_data is None:
-        #     raise ValueError("Binary data is not generated yet.")
-        
-
-        # img_index = 0
-        # directory = f"results/imgs/{output_folder}"
-        # os.makedirs(directory, exist_ok=True)
-        # img_bit_width = -(-(self.img_width//BLOCK_SIZE)//self.chunk_size) # Taking the ceiling
-        # img_bit_height = -(-(self.img_height//BLOCK_SIZE)//self.chunk_size)
-
-        # img = Image.new(mode = 'RGB', size = (self.img_width, self.img_height), color = (74,65,42))
-
-        # drawable_img = ImageDraw.Draw(img)
-
-        # split_binary_chunks = []
-
-        # for i in range(self.chunk_size, len(self.binary_data) + self.chunk_size, self.chunk_size): 
-        #     encoding = self.binary_data[i-self.chunk_size:i]
-        #     while len(encoding) < self.chunk_size:
-        #         encoding += "0"
-        #     split_binary_chunks.append(encoding) 
-        #     print(f"{i} in {encoding}")
-        # print(split_binary_chunks)
-
-        # for y in range(img_bit_height):
-        #     for x in range(img_bit_width):
-        #         if y * img_bit_width + x >= len(self.binary_data) // self.chunk_size:
-        #             img.save(f"{directory}/{img_index}.png", "PNG")
-        #             return
-        #         print(f"Placing {split_binary_chunks[y * img_bit_width + x]} block " +
-        #               f"at {(x*BLOCK_SIZE, y*BLOCK_SIZE), (x*BLOCK_SIZE + BLOCK_SIZE - 1, y*BLOCK_SIZE + BLOCK_SIZE - 1)}")
-        #         drawable_img.rectangle([(x*BLOCK_SIZE, y*BLOCK_SIZE), 
-        #                                 (x*BLOCK_SIZE + BLOCK_SIZE - 1, y*BLOCK_SIZE + BLOCK_SIZE - 1)], 
-        #                                 fill=self.color_thresholds[split_binary_chunks[y * img_bit_width + x]])
-
-        # for y in range(img_bit_height):
-        #     for x in range(img_bit_width):
-        #         if y * img_bit_width + x >= len(self.binary_data) // self.chunk_size:
-        #             img.save(f"{directory}/{img_index}.png", "PNG")
-        #             return
-        #         drawable_img.rectangle([(x*BLOCK_SIZE, y*BLOCK_SIZE), 
-        #                             (x*BLOCK_SIZE + BLOCK_SIZE, y*BLOCK_SIZE + BLOCK_SIZE)], 
-        #                             fill=self.color_map[self.binary_data[y * img_bit_width + x]])
-
-        # img.save(f"{directory}/{img_index}.png", "PNG")
-        # img_index += 1
-        # self.binary_data = self.binary_data[img_bit_width * img_bit_height :]
-    
 
     def generate_video(self, directory, frame_rate):
         """
