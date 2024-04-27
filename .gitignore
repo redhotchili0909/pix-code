@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 .DS_Store
 .vscode/
+credentials/
+youtube-v3.oauth2.json
