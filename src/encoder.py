@@ -35,9 +35,6 @@ class Encoder:
         result as a single string where each character's binary code is separated by
         a space.
 
-        Parameters:
-        filename (str): The path to the text file to be converted.
-
         Returns:
         str: A string containing the binary representation of the file's contents,
             or None if an error occurs during file reading.
@@ -58,6 +55,33 @@ class Encoder:
             raise
 
     def create_pngs_from_binary(self, output_folder, BLOCK_SIZE, img_index=0, COLOR=True):
+        """
+        Converts binary data into images and saves them as PNG files within a specified directory.
+        Each image's pixel colors are determined based on whether the operation is in color mode or
+        black-and-white. The method splits the binary data into chunks and processes each chunk to
+        create individual image blocks that are then saved as PNG files.
+
+        Parameters:
+        output_folder (str): The folder within 'results/imgs' where the images will be saved.
+                            This method will create the directory if it does not already exist.
+        BLOCK_SIZE (int): The nxn size of each block in pixels, which determines the resolution of the 
+                        created image. A smaller BLOCK_SIZE results in higher resolution images.
+        img_index (int, optional): The starting index for naming saved image files. Defaults to 0.
+        COLOR (bool, optional): Determines if the images are processed in color (True) or in 
+                                black-and-white (False). Defaults to True.
+
+        Raises:
+        ValueError: If the binary data has not been generated before this method is called.
+
+        Side Effects:
+        - This method prints messages indicating the status of image creation and saving.
+        - Images are saved within the specified directory under 'results/imgs', potentially
+        creating many image files depending on the size of the binary data and the specified BLOCK_SIZE.
+        - Directories are created if they do not already exist.
+
+        Returns:
+        None.
+        """
         CHUNK_SIZE = 1 if not COLOR else 3
         (print("Creating colored image data...") 
          if COLOR else 
@@ -117,17 +141,20 @@ class Encoder:
         """
         Generate a video from a sequence of PNG images stored in a specified directory.
 
-        This function reads a specified number of PNG images from a directory,
-        and compiles them into a single video file with a specified frame rate.
+        This function compiles PNGs in a specified directory into a video. It also
+        creates the PNGs from inherited binary data if the images do not yet exist.
+
         The output video is saved in the 'results/vids/' directory.
         It handles image reading failures by stopping the video creation
         if an image file cannot be loaded.
 
         Parameters:
-        num_images (int): The number of images to include in the video.
-        output_folder (str): The directory path where the PNG images are stored.
+        output_folder (str): The directory path where the PNG images are stored and also 
+                            what the video will be named
         frame_rate (float): The frame rate of the output video in frames per second.
         BLOCK_SIZE (int): The size of the blocks where bits of binary data are stored
+        COLOR (bool, optional): controls whether the video will be encoded with 3 bit 
+                        colors (True) or black and white (False). Defaults to True.
 
         Raises:
         FileNotFoundError: If the specified directory does not contain the images.
