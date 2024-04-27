@@ -4,7 +4,7 @@ import cv2
 
 
 class Encoder:
-    def __init__(self, chunk_size, filepath=None, binary_data=None, img_width=1920, img_height=1080):
+    def __init__(self, filepath=None, binary_data=None, img_width=1920, img_height=1080):
         self.color_map = {
             "0": (0, 0, 0),
             "1": (255, 255, 255),
@@ -19,7 +19,7 @@ class Encoder:
             '101': (255, 255, 0),
             '110': (255, 0, 255)
         }
-        self.chunk_size = chunk_size
+        self.chunk_size = 3
         self.img_width = img_width
         self.img_height = img_height
         self.binary_data = binary_data
@@ -57,7 +57,7 @@ class Encoder:
             print(f"An error occurred: {e}")
             raise
 
-    def create_png_from_binary(self, output_folder, BLOCK_SIZE):
+    def create_png_from_binary(self, output_folder, BLOCK_SIZE, img_index = 0):
         """
         Convert binary data to a PNG image file.
 
@@ -74,8 +74,6 @@ class Encoder:
         if self.binary_data is None:
             raise ValueError("Binary data is not generated yet.")
         
-
-        img_index = 0
         directory = f"results/imgs/{output_folder}"
         os.makedirs(directory, exist_ok=True)
         img_bit_width = self.img_width//BLOCK_SIZE
@@ -88,14 +86,19 @@ class Encoder:
         for y in range(img_bit_height):
             for x in range(img_bit_width):
                 if y * img_bit_width + x >= len(self.binary_data):
+                    print("im here in this if statement")
                     img.save(f"{directory}/{img_index}.png", "PNG")
                     return
+                print(f"Placing {self.binary_data[y * img_bit_width + x]} block " +
+                      f"at {(x*BLOCK_SIZE, y*BLOCK_SIZE), (x*BLOCK_SIZE + BLOCK_SIZE - 1, y*BLOCK_SIZE + BLOCK_SIZE - 1)}")
                 drawable_img.rectangle([(x*BLOCK_SIZE, y*BLOCK_SIZE), 
                                         (x*BLOCK_SIZE + BLOCK_SIZE - 1, y*BLOCK_SIZE + BLOCK_SIZE - 1)], 
                                         fill=self.color_map[self.binary_data[y * img_bit_width + x]])
         img.save(f"{directory}/{img_index}.png", "PNG")
-        img_index += 1
-        self.binary_data = self.binary_data[img_bit_width * img_bit_height :]
+        if len(self.binary_data) > img_bit_height*img_bit_width:
+            self.binary_data = self.binary_data[img_bit_width * img_bit_height :]
+            print(f"creating {output_folder}{img_index} ...")
+            self.create_png_from_binary(output_folder, BLOCK_SIZE, img_index + 1)
 
         # if self.binary_data is None:
         #     raise ValueError("Binary data is not generated yet.")
@@ -118,6 +121,19 @@ class Encoder:
         #     while len(encoding) < self.chunk_size:
         #         encoding += "0"
         #     split_binary_chunks.append(encoding) 
+        #     print(f"{i} in {encoding}")
+        # print(split_binary_chunks)
+
+        # for y in range(img_bit_height):
+        #     for x in range(img_bit_width):
+        #         if y * img_bit_width + x >= len(self.binary_data) // self.chunk_size:
+        #             img.save(f"{directory}/{img_index}.png", "PNG")
+        #             return
+        #         print(f"Placing {split_binary_chunks[y * img_bit_width + x]} block " +
+        #               f"at {(x*BLOCK_SIZE, y*BLOCK_SIZE), (x*BLOCK_SIZE + BLOCK_SIZE - 1, y*BLOCK_SIZE + BLOCK_SIZE - 1)}")
+        #         drawable_img.rectangle([(x*BLOCK_SIZE, y*BLOCK_SIZE), 
+        #                                 (x*BLOCK_SIZE + BLOCK_SIZE - 1, y*BLOCK_SIZE + BLOCK_SIZE - 1)], 
+        #                                 fill=self.color_thresholds[split_binary_chunks[y * img_bit_width + x]])
 
         # for y in range(img_bit_height):
         #     for x in range(img_bit_width):
@@ -125,17 +141,8 @@ class Encoder:
         #             img.save(f"{directory}/{img_index}.png", "PNG")
         #             return
         #         drawable_img.rectangle([(x*BLOCK_SIZE, y*BLOCK_SIZE), 
-        #                                 (x*BLOCK_SIZE + BLOCK_SIZE, y*BLOCK_SIZE + BLOCK_SIZE)], 
-        #                                 fill=self.color_thresholds[split_binary_chunks[y * img_bit_width + x]])
-
-        # # for y in range(img_bit_height):
-        # #     for x in range(img_bit_width):
-        # #         if y * img_bit_width + x >= len(self.binary_data) // self.chunk_size:
-        # #             img.save(f"{directory}/{img_index}.png", "PNG")
-        # #             return
-        # #         drawable_img.rectangle([(x*BLOCK_SIZE, y*BLOCK_SIZE), 
-        # #                             (x*BLOCK_SIZE + BLOCK_SIZE, y*BLOCK_SIZE + BLOCK_SIZE)], 
-        # #                             fill=self.color_map[self.binary_data[y * img_bit_width + x]])
+        #                             (x*BLOCK_SIZE + BLOCK_SIZE, y*BLOCK_SIZE + BLOCK_SIZE)], 
+        #                             fill=self.color_map[self.binary_data[y * img_bit_width + x]])
 
         # img.save(f"{directory}/{img_index}.png", "PNG")
         # img_index += 1
