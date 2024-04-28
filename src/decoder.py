@@ -72,9 +72,9 @@ class Decoder:
         - Red : 001
         - Green : 010
         - Blue : 100
-        - Yellow : 011
+        - Yellow : 110
         - Cyan : 101
-        - Magenta : 110
+        - Magenta : 011
 
         Parameters:
         frame (np.array): The frame to convert.

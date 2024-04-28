@@ -1,6 +1,7 @@
 import os
 from PIL import Image, ImageDraw
 import cv2
+import fnmatch
 
 
 class Encoder:
@@ -16,8 +17,8 @@ class Encoder:
             '010': (0, 255, 0),
             '100': (255, 0, 0),
             '011': (0, 255, 255),
-            '101': (255, 255, 0),
-            '110': (255, 0, 255)
+            '101': (255, 0, 255),
+            '110': (255, 255, 0)
         }
         self.img_width = img_width
         self.img_height = img_height
@@ -104,21 +105,24 @@ class Encoder:
                 while len(encoding) < CHUNK_SIZE:
                     encoding += "0"
                 split_binary_chunks.append(encoding)
+            # print(split_binary_chunks)
 
             for y in range(img_bit_height):
                 for x in range(img_bit_width):
                     chunk_index = y * img_bit_width + x
                     if chunk_index >= len(split_binary_chunks):
-                        print(f"Now saving image {directory}/{img_index}.png\n")
+                        print(f"Now saving image {directory}/{img_index}.png")
                         img.save(f"{directory}/{img_index}.png", "PNG")
                         return
-                    # print(f"Placing {split_binary_chunks[y * img_bit_width + x]} block " +
+                    # print(f"Placing {split_binary_chunks[chunk_index]} block " +
                     #       f"at {(x*BLOCK_SIZE, y*BLOCK_SIZE)}, " + 
                     #       f"{(x*BLOCK_SIZE + BLOCK_SIZE - 1, y*BLOCK_SIZE + BLOCK_SIZE - 1)}")
+                    # print(f"The block color is {self.color_thresholds[split_binary_chunks[chunk_index]]}")
+                    # print()
                     fill = (
                         self.color_thresholds[split_binary_chunks[chunk_index]]
                         if COLOR else
-                        self.color_map[current_data[y * img_bit_width + x]]
+                        self.color_map[current_data[chunk_index]]
                     )
                     drawable_img.rectangle([(x*BLOCK_SIZE, y*BLOCK_SIZE),
                                             (x*BLOCK_SIZE + BLOCK_SIZE - 1, 
@@ -132,12 +136,11 @@ class Encoder:
                 next_data = current_data[binary_per_image:]
                 process_image(next_data, img_index + 1)
 
-        # Call the inner function with the initial binary data
         if self.binary_data is None:
             raise ValueError("Binary data is not generated yet.")
         process_image(self.binary_data, img_index)
 
-    def generate_video(self, output_folder, frame_rate, BLOCK_SIZE, COLOR=True):
+    def generate_video(self, output_folder, frame_rate, BLOCK_SIZE, ALWAYS_CREATE_PNGS=False, COLOR=True):
         """
         Generate a video from a sequence of PNG images stored in a specified directory.
 
@@ -160,12 +163,14 @@ class Encoder:
         FileNotFoundError: If the specified directory does not contain the images.
         Exception: For issues that may arise during video file creation.
         """
-        path = f"results/imgs/{output_folder}"
-        if not os.path.exists(path) or not os.path.isdir(path):
+        directory = f"results/imgs/{output_folder}"
+        if not os.path.exists(directory) or not os.path.isdir(directory):
+            self.create_pngs_from_binary(output_folder, BLOCK_SIZE, COLOR=COLOR)
+        elif ALWAYS_CREATE_PNGS:
             self.create_pngs_from_binary(output_folder, BLOCK_SIZE, COLOR=COLOR)
         output_video_path = f"results/vids/{output_folder}.mp4"
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        first_image_path = path + "/0.png"
+        first_image_path = directory + "/0.png"
         frame = cv2.imread(first_image_path)
 
         if frame is None:
@@ -177,9 +182,11 @@ class Encoder:
             output_video_path, fourcc, frame_rate, (frame.shape[1], frame.shape[0])
         )
 
-        img_index = 0
-        while True:
-            img_path = path + f"/{img_index}.png"
+        num_files = len(fnmatch.filter(os.listdir(directory), "*.png"))
+        print('File Count:', num_files)
+
+        for img_index in range(num_files):
+            img_path = directory + f"/{img_index}.png"
             frame = cv2.imread(img_path)
             if frame is None:
                 break
@@ -187,4 +194,4 @@ class Encoder:
             img_index += 1
 
         video.release()
-        print(f"Video of {output_folder} created successfully.")
+        print(f"Video of {output_folder} created successfully.\n")
