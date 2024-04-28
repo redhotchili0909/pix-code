@@ -48,6 +48,7 @@ class Encoder:
             with open(self.filepath, "r", encoding="utf-8") as file:
                 text = file.read()
             self.binary_data = "".join(format(ord(char), "08b") for char in text)
+            print("text to binary says ", self.binary_data)
         except FileNotFoundError:
             print("The file was not found. Please check the file path.")
             raise
@@ -83,6 +84,7 @@ class Encoder:
         Returns:
         None.
         """
+        print("pngs says ", self.binary_data)
         CHUNK_SIZE = 1 if not COLOR else 3
         (print("Creating colored image data...") 
          if COLOR else 
