@@ -170,6 +170,8 @@ class Encoder:
             self.create_pngs_from_binary(output_folder, BLOCK_SIZE, COLOR=COLOR)
         elif ALWAYS_CREATE_PNGS:
             self.create_pngs_from_binary(output_folder, BLOCK_SIZE, COLOR=COLOR)
+
+        os.makedirs(f"results/vids/", exist_ok=True)
         output_video_path = f"results/vids/{output_folder}.mp4"
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         first_image_path = directory + "/0.png"
