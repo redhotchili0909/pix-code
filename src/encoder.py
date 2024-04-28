@@ -48,7 +48,6 @@ class Encoder:
             with open(self.filepath, "r", encoding="utf-8") as file:
                 text = file.read()
             self.binary_data = "".join(format(ord(char), "08b") for char in text)
-            print("text to binary says ", self.binary_data)
         except FileNotFoundError:
             print("The file was not found. Please check the file path.")
             raise
@@ -149,13 +148,13 @@ class Encoder:
         This function compiles PNGs in a specified directory into a video. It also
         creates the PNGs from inherited binary data if the images do not yet exist.
 
-        The output video is saved in the 'results/vids/' directory.
-        It handles image reading failures by stopping the video creation
-        if an image file cannot be loaded.
+        The output video is saved in the 'results/vids/' directory. If the directory
+        does not exist, it creates it. It handles image reading failures by stopping 
+        the video creation if an image file cannot be loaded.
 
         Parameters:
-        output_folder (str): The directory path where the PNG images are stored and also 
-                            what the video will be named
+        output_folder (str): The directory path where the PNG images are stored and 
+                            also what the video will be named
         frame_rate (float): The frame rate of the output video in frames per second.
         BLOCK_SIZE (int): The size of the blocks where bits of binary data are stored
         COLOR (bool, optional): controls whether the video will be encoded with 3 bit 

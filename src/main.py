@@ -1,14 +1,9 @@
 from encoder import Encoder
 import os
 
-# frankenstein = Encoder("assets/frankenstein.txt")
-# frankenstein.generate_video("frankenstein", 5, 5)
+frankenstein = Encoder("assets/frankenstein.txt")
+frankenstein.generate_video("frankenstein", frame_rate=5, BLOCK_SIZE=3)
 
-# hello = Encoder("assets/hello.txt")
-# hello.generate_video("hello", 1, 120)
-
-# manual_hello = Encoder(binary_data="0110100001100101011011000110110001101111")
-# manual_hello.generate_video("manual_hello", 1, 120)
-
-manual_test = Encoder(binary_data="011010")
-manual_test.generate_video("manual_test", 1, 120)
+# file = str(input("Enter the name of the text file (excluding the file extension) you want to turn into a video:"))
+# encoder = Encoder(f"assets/{file}.txt")
+# encoder.generate_video(file, 1, 120)
