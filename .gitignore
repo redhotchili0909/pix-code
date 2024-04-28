@@ -5,3 +5,4 @@ __pycache__/
 credentials/
 youtube-v3.oauth2.json
 .mp4
+results/
