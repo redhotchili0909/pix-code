@@ -4,5 +4,7 @@ __pycache__/
 .vscode/
 credentials/
 youtube-v3.oauth2.json
-.mp4
+results/imgs/
+results/vids/
 results/
+.mp4
