@@ -55,17 +55,18 @@ def download_video(url):
 
 def main():
     youtube = get_authenticated_service()
-    file_path = "/home/redhotchili0909/schoolwork/dsa_2024/projects/pix-code/results/vids/test_1920x1080_5x5.mp4"
-    title = "pix-code Test"
+    file_path = "results/vids/frankenstein.mp4"
+    title = "pix-code-test-frankenstein"
     description = "Testing for pix-code video upload"
     category_id = "22"
     keywords = ["storage", "encryption"]
-    privacy_status = "private"
+    privacy_status = "unlisted"
 
     upload_response = upload_video(
         youtube, file_path, title, description, category_id, keywords, privacy_status
     )
     print("Uploaded video with ID:", upload_response["id"])
+
 
 if __name__ == "__main__":
     main()
