@@ -1,22 +1,21 @@
-from encoder import Encoder
-from decoder import Decoder
+from pix_code_encoder import Encoder
+from pix_code_decoder import Decoder
 from video_pipeline import *
 from time import sleep
 
-print("Enter a text-file to encode: ")
-filename = input()
-
-text_file = Encoder(f"assets/{filename}.txt")
-
 print("Select Next Actions: ")
-print("1. Generate Video")
-print("2. Quit")
+print("1. Encode/Generate Video")
+print("2. Decode Video")
+print("3. Quit")
 print("-" * 20)
 encoded_text = input()
 
 
 match encoded_text:
     case "1":
+        print("Enter a text-file to encode: ")
+        filename = input()
+        text_file = Encoder(f"assets/{filename}.txt")
         print("-" * 20)
         print("Enter frame rate: & pixel size: ")
         print("Ex. 1,5")
@@ -25,6 +24,16 @@ match encoded_text:
         print("-" * 20)
         text_file.generate_video(filename, int(frame_rate), int(pixel_size))
     case "2":
+        print("-" * 20)
+        print("Enter video title & pixel size: ")
+        print("Ex. bee,5")
+        filename, pixel_size = input().split(",")
+        decoder = Decoder(video_filepath=f"results/vids/{filename}.mp4")
+        text = decoder.binary_to_text(int(pixel_size))
+        print("Output: ")
+        print(text)
+        quit()
+    case "3":
         print("-" * 20)
         print("Quitting...")
         quit()
