@@ -68,7 +68,7 @@ class Decoder:
             "yellow": np.array([0, 255, 255]),
             "cyan": np.array([255, 255, 0]),
             "magenta": np.array([255, 0, 255]),
-            "none": np.array([42, 65, 74]),
+            "none": np.array([127, 127, 127]),
         }
 
         # 3-bit representations
@@ -82,6 +82,7 @@ class Decoder:
             "cyan": [0, 1, 1],
             "magenta": [1, 0, 1],
         }
+        counter = 0
         for idx1 in range(num_blocks_y):
             for idx2 in range(num_blocks_x):
                 center_pixel = frame[idx1 * pixel_size + offset][
@@ -92,7 +93,10 @@ class Decoder:
                     key=lambda x: np.linalg.norm(center_pixel - color_thresholds[x]),
                 )
                 if closest_color == "none":
-                    continue
+                    closest_color = "black"
+                    counter += 1
+                    if counter == 1:
+                        print(f"x: {idx2}, y: {idx1} is none")
                 binary_frame[idx1, idx2] = color_representations[closest_color]
         return binary_frame
 
@@ -108,7 +112,11 @@ class Decoder:
                 filtered_row = row.flatten()
                 binary_string = "".join(str(bit) for bit in filtered_row if bit != -1)
                 binary_chunk += binary_string
-
+        binary_chunk = binary_chunk[:-2]
+        print("Binary Chunk Length: ", len(binary_chunk))
+        # binary_from_broken_decode = open("binaryfrombrokensmallerloremdecodeagain.txt", "w")
+        # binary_from_broken_decode.write(binary_chunk)
+        # binary_from_broken_decode.close()
         # Convert each 8 bits to an ASCII character
         text_chars = [binary_chunk[i : i + 8] for i in range(0, len(binary_chunk), 8)]
         for char in text_chars:

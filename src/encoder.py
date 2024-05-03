@@ -83,7 +83,11 @@ class Encoder:
         Returns:
         None.
         """
-        print("pngs says ", self.binary_data)
+        #print("pngs says ", self.binary_data)
+        print("Length: ", len(self.binary_data))
+        # file1 = open(f"binaryfrombroken{output_folder}.txt", "w")  # write mode
+        # file1.write(self.binary_data)
+        # file1.close()
         CHUNK_SIZE = 1 if not COLOR else 3
         (print("Creating colored image data...") 
          if COLOR else 
@@ -94,7 +98,7 @@ class Encoder:
             img_bit_width = self.img_width // BLOCK_SIZE
             img_bit_height = self.img_height // BLOCK_SIZE
 
-            img = Image.new(mode='RGB', size=(self.img_width, self.img_height), color=(74, 65, 42))
+            img = Image.new(mode='RGB', size=(self.img_width, self.img_height), color=(127, 127, 127))
             drawable_img = ImageDraw.Draw(img)
 
             split_binary_chunks = []
