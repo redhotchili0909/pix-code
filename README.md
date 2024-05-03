@@ -1,5 +1,10 @@
 # pix-code
 
+This project served as an experiment to create visually stored binary text data, as 
+inspired by [this video](https://www.youtube.com/watch?v=_w6PCHutmb4). Though its 
+data storage efficiency is lacking, it served primarily as an exploration of an unusual 
+data storage method and a preview into real issues like data compression, corruption,
+and error handling.
 
 ## Files
 
@@ -38,13 +43,17 @@ Each script can be run individually, depending on the task.
 To generate a video from a text file, place the text file into the assets
 folder and run main.py. Input the name of the text file and follow the instructions shown in the terminal.
 
-![Encoding_Instructions](assets/sample/encode.gif)
+https://youtu.be/5lOzzKL2dUg
+
+### The video
+If you're curious, here's the video that we generate and decode!
+
+https://youtu.be/KxD6iKkwIQI
 
 ### Decoding a video
 Clarify the video you wish to decode
 
-![Encoding_Instructions](assets/sample/decode.gif)
-
+https://youtu.be/_Yob7k-bAgM
 
 ## Reference
 
