@@ -43,7 +43,8 @@ Each script can be run individually, depending on the task.
 To generate a video from a text file, place the text file into the assets
 folder and run main.py. Input the name of the text file and follow the instructions shown in the terminal.
 
-https://youtu.be/5lOzzKL2dUg
+<iframe width="560" height="315" src="https://youtu.be/5lOzzKL2dUg" frameborder="0" allowfullscreen></iframe>
+
 
 ### The video
 If you're curious, here's the video that we generate and decode!
