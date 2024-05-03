@@ -44,18 +44,21 @@ To generate a video from a text file, place the text file into the assets
 folder and run main.py. Input the name of the text file and follow the instructions shown in the terminal.
 
 [![The encoding video](https://img.youtube.com/vi/5lOzzKL2dUg/0.jpg)](https://www.youtube.com/watch?v=5lOzzKL2dUg)
+
 Click on the video to see it in full resolution on YouTube.
 
 ### The video
 If you're curious, here's the video that we generate and decode!
 
 [![The encoded video](https://img.youtube.com/vi/KxD6iKkwIQI/0.jpg)](https://www.youtube.com/watch?v=KxD6iKkwIQI)
+
 Click on the video to see it in full resolution on YouTube.
 
 ### Decoding a video
 Clarify the video you wish to decode
 
 [![The encoding video](https://img.youtube.com/vi/_Yob7k-bAgM/0.jpg)](https://www.youtube.com/watch?v=_Yob7k-bAgM)
+
 Click on the video to see it in full resolution on YouTube.
 
 ## Reference
