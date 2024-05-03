@@ -43,18 +43,17 @@ Each script can be run individually, depending on the task.
 To generate a video from a text file, place the text file into the assets
 folder and run main.py. Input the name of the text file and follow the instructions shown in the terminal.
 
-<iframe width="560" height="315" src="https://youtu.be/5lOzzKL2dUg" frameborder="0" allowfullscreen></iframe>
-
+[![The encoding video](https://img.youtube.com/vi/5lOzzKL2dUg/0.jpg)](https://www.youtube.com/watch?v=5lOzzKL2dUg)
 
 ### The video
 If you're curious, here's the video that we generate and decode!
 
-https://youtu.be/KxD6iKkwIQI
+[![The encoded video](https://img.youtube.com/vi/KxD6iKkwIQI/0.jpg)](https://www.youtube.com/watch?v=KxD6iKkwIQI)
 
 ### Decoding a video
 Clarify the video you wish to decode
 
-https://youtu.be/_Yob7k-bAgM
+[![The encoding video](https://img.youtube.com/vi/_Yob7k-bAgM/0.jpg)](https://www.youtube.com/watch?v=_Yob7k-bAgM)
 
 ## Reference
 
