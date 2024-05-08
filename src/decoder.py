@@ -11,6 +11,9 @@ class Decoder:
         """
         Process the video by extracting each frame and selectively converting pixel colors
         to binary data based on their black or white status.
+
+        Parameters:
+        pixel_size (int): the block size representing each 3 bit encoding in the provided video
         """
         # Open the video file
         cap = cv2.VideoCapture(self.video_filepath)
@@ -29,8 +32,7 @@ class Decoder:
             cap.release()
 
         print(
-            f"Processed {frame_count} frames. Binary data captured selectively for each pixel."
-        )
+            f"Processed {frame_count} frames. Binary data captured selectively for each pixel.", end='\n\n')
 
     def convert_to_color(self, frame, pixel_size):
         """
@@ -95,9 +97,9 @@ class Decoder:
                 if closest_color == "none":
                     closest_color = "black"
                     counter += 1
-                    if counter == 1:
-                        print(f"x: {idx2}, y: {idx1} is none")
                 binary_frame[idx1, idx2] = color_representations[closest_color]
+
+        print(f"I was uncertain about {counter} characters")
         return binary_frame
 
     def binary_to_text(self):
@@ -114,9 +116,6 @@ class Decoder:
                 binary_chunk += binary_string
         binary_chunk = binary_chunk[:-2]
         print("Binary Chunk Length: ", len(binary_chunk))
-        # binary_from_broken_decode = open("binaryfrombrokensmallerloremdecodeagain.txt", "w")
-        # binary_from_broken_decode.write(binary_chunk)
-        # binary_from_broken_decode.close()
         # Convert each 8 bits to an ASCII character
         text_chars = [binary_chunk[i : i + 8] for i in range(0, len(binary_chunk), 8)]
         for char in text_chars:

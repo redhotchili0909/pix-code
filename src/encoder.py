@@ -2,13 +2,14 @@ import os
 from PIL import Image, ImageDraw
 import cv2
 import fnmatch
-
+import shutil
+import sys
 
 class Encoder:
-    def __init__(self, filepath=None, binary_data=None, img_width=1920, img_height=1080):
+    def __init__(self, filepath=None, binary_data="", img_width=1920, img_height=1080):
         self.color_map = {
             "0": (0, 0, 0),
-            "1": (255, 255, 255),
+            "1": (255, 255, 255), 
         }  # Black for '0', White for '1'
         self.color_thresholds = {
             '000': (0, 0, 0),
@@ -24,7 +25,7 @@ class Encoder:
         self.img_height = img_height
         self.binary_data = binary_data
         self.filepath = filepath
-        if self.binary_data is None and self.filepath is not None:
+        if self.binary_data == "" and self.filepath is not None:
             self.text_to_binary()
 
     def text_to_binary(self):
@@ -45,9 +46,19 @@ class Encoder:
         Exception: For other issues that may arise during file reading.
         """
         try:
+            invalid_chars = set()
             with open(self.filepath, "r", encoding="utf-8") as file:
                 text = file.read()
-            self.binary_data = "".join(format(ord(char), "08b") for char in text)
+            binary_data = []
+            for char in text:
+                if len(char.encode('utf-8')) == 1:  # Check if the char is 8 bits long
+                    binary_data.append(format(ord(char), "08b"))
+                else:
+                    invalid_chars.add(char)
+            self.binary_data = ''.join(binary_data)
+            if invalid_chars:
+                print(f"Skipped invalid characters: {invalid_chars}")
+            
         except FileNotFoundError:
             print("The file was not found. Please check the file path.")
             raise
@@ -55,7 +66,22 @@ class Encoder:
             print(f"An error occurred: {e}")
             raise
 
-    def create_pngs_from_binary(self, output_folder, BLOCK_SIZE, img_index=0, COLOR=True):
+    def clear_directory(self, directory):
+        """
+        Clearing a provided directory to prepare it for video generation
+
+        Parameters:
+        directory (str): A string representing what directory to clear
+        """
+        print("This will clear the directory you provided. Type Y to continue"
+              + " or anything else to quit")
+        if os.path.exists(directory) and input() == "Y":
+            print(directory)
+            shutil.rmtree(directory)
+            return
+        sys.exit()
+
+    def create_pngs_from_binary(self, output_folder, BLOCK_SIZE, COLOR=True):
         """
         Converts binary data into images and saves them as PNG files within a specified directory.
         Each image's pixel colors are determined based on whether the operation is in color mode or
@@ -67,7 +93,6 @@ class Encoder:
                             This method will create the directory if it does not already exist.
         BLOCK_SIZE (int): The nxn size of each block in pixels, which determines the resolution of the 
                         created image. A smaller BLOCK_SIZE results in higher resolution images.
-        img_index (int, optional): The starting index for naming saved image files. Defaults to 0.
         COLOR (bool, optional): Determines if the images are processed in color (True) or in 
                                 black-and-white (False). Defaults to True.
 
@@ -83,17 +108,17 @@ class Encoder:
         Returns:
         None.
         """
-        #print("pngs says ", self.binary_data)
-        print("Length: ", len(self.binary_data))
-        # file1 = open(f"binaryfrombroken{output_folder}.txt", "w")  # write mode
-        # file1.write(self.binary_data)
-        # file1.close()
+        directory = f"results/imgs/{output_folder}"
+        self.clear_directory(directory)  # Clear the directory before creating new images
+
         CHUNK_SIZE = 1 if not COLOR else 3
+        img_index = 0
+
         (print("Creating colored image data...") 
          if COLOR else 
          print("Creating black and white image data..."))
+        
         def process_image(current_data, img_index):
-            directory = f"results/imgs/{output_folder}"
             os.makedirs(directory, exist_ok=True)
             img_bit_width = self.img_width // BLOCK_SIZE
             img_bit_height = self.img_height // BLOCK_SIZE
@@ -110,7 +135,6 @@ class Encoder:
                 while len(encoding) < CHUNK_SIZE:
                     encoding += "0"
                 split_binary_chunks.append(encoding)
-            # print(split_binary_chunks)
 
             for y in range(img_bit_height):
                 for x in range(img_bit_width):
@@ -119,11 +143,6 @@ class Encoder:
                         print(f"Now saving image {directory}/{img_index}.png")
                         img.save(f"{directory}/{img_index}.png", "PNG")
                         return
-                    # print(f"Placing {split_binary_chunks[chunk_index]} block " +
-                    #       f"at {(x*BLOCK_SIZE, y*BLOCK_SIZE)}, " + 
-                    #       f"{(x*BLOCK_SIZE + BLOCK_SIZE - 1, y*BLOCK_SIZE + BLOCK_SIZE - 1)}")
-                    # print(f"The block color is {self.color_thresholds[split_binary_chunks[chunk_index]]}")
-                    # print()
                     fill = (
                         self.color_thresholds[split_binary_chunks[chunk_index]]
                         if COLOR else
@@ -145,7 +164,7 @@ class Encoder:
             raise ValueError("Binary data is not generated yet.")
         process_image(self.binary_data, img_index)
 
-    def generate_video(self, output_folder, frame_rate, BLOCK_SIZE, ALWAYS_CREATE_PNGS=False, COLOR=True):
+    def generate_video(self, output_folder, frame_rate, BLOCK_SIZE, COLOR=True):
         """
         Generate a video from a sequence of PNG images stored in a specified directory.
 
@@ -169,10 +188,7 @@ class Encoder:
         Exception: For issues that may arise during video file creation.
         """
         directory = f"results/imgs/{output_folder}"
-        if not os.path.exists(directory) or not os.path.isdir(directory):
-            self.create_pngs_from_binary(output_folder, BLOCK_SIZE, COLOR=COLOR)
-        elif ALWAYS_CREATE_PNGS:
-            self.create_pngs_from_binary(output_folder, BLOCK_SIZE, COLOR=COLOR)
+        self.create_pngs_from_binary(output_folder, BLOCK_SIZE, COLOR=COLOR)
 
         os.makedirs(f"results/vids/", exist_ok=True)
         output_video_path = f"results/vids/{output_folder}.mp4"
@@ -202,3 +218,12 @@ class Encoder:
 
         video.release()
         print(f"Video of {output_folder} created successfully.\n")
+
+
+# def main():
+#     object = Encoder("assets/frankenstein.txt")
+#     object.generate_video(output_folder="frankenstein", frame_rate=1, BLOCK_SIZE=5, COLOR=True)
+
+
+# if __name__ == "__main__":
+#     main()
