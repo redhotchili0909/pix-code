@@ -13,22 +13,25 @@ encoded_text = input()
 
 match encoded_text:
     case "1":
-        print("Enter a text-file to encode: ")
         print("-" * PRINT_LINE_WIDTH)
+        print("Enter a text-file to encode: ")
         filename = input()
+        encoder_instance = Encoder(f"assets/{filename}.txt")
+        print("-" * PRINT_LINE_WIDTH)
         print("Enter frame rate & pixel size \nEx. 1,5")
         print("-" * PRINT_LINE_WIDTH)
         frame_rate, block_size = input().split(",")
-        encoder_instance = Encoder(f"assets/{filename}.txt")
         encoder_instance.generate_video(
             output_folder=filename, 
             frame_rate=int(frame_rate), 
             BLOCK_SIZE=int(block_size)
             )
+        print("-" * PRINT_LINE_WIDTH)
     case "2":
         print("-" * PRINT_LINE_WIDTH)
         print("Enter video title & pixel size: ")
         print("Ex. bee,5")
+        print("-" * PRINT_LINE_WIDTH)
         filename, block_size = input().split(",")
         decoder = Decoder(video_filepath=f"results/vids/{filename}.mp4")
         text = decoder.binary_to_text(int(block_size))
@@ -57,8 +60,8 @@ match upload:
         except Exception as e:
             # Handle any other exceptions
             print("An error occurred:", e)
-            print("YouTube upload unsuccessful. Please add your credentials file into" +  
-                  "the pix-code directory, as outlined in the README")
+            print("YouTube upload unsuccessful. Please add your credentials" +
+                  " file into the pix-code directory, as outlined in the README")
             YOUTUBE = False
         
         if YOUTUBE:
@@ -95,7 +98,8 @@ if YOUTUBE:
     download_video(f"{link}")
 
 print("-" * PRINT_LINE_WIDTH)
-print("Would you like to decode the video to text? (Y/N) (This may take a while if your file is long): ")
+print("Would you like to decode the video to text? (Y/N)" +
+      " (This may take a while if your file is long): ")
 decoding = input()
 
 match decoding:

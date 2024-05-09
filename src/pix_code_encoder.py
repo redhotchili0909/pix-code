@@ -74,14 +74,14 @@ class Encoder:
         directory (str): A string representing what directory to clear
         """
         print("This will clear the directory you provided. Type Y to continue"
-              + " or anything else to quit")
+              + " or anything else to quit.")
         if os.path.exists(directory) and input() == "Y":
             print(directory)
             shutil.rmtree(directory)
             return
         sys.exit()
 
-    def create_pngs_from_binary(self, output_folder, BLOCK_SIZE, COLOR=True):
+    def create_pngs_from_binary(self, output_folder, BLOCK_SIZE, COLOR=True, PRINT=False):
         """
         Converts binary data into images and saves them as PNG files within a specified directory.
         Each image's pixel colors are determined based on whether the operation is in color mode or
@@ -140,7 +140,7 @@ class Encoder:
                 for x in range(img_bit_width):
                     chunk_index = y * img_bit_width + x
                     if chunk_index >= len(split_binary_chunks):
-                        print(f"Now saving image {directory}/{img_index}.png")
+                        if PRINT: print(f"Now saving image {directory}/{img_index}.png")
                         img.save(f"{directory}/{img_index}.png", "PNG")
                         return
                     fill = (
