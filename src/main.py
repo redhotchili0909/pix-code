@@ -14,22 +14,24 @@ encoded_text = input()
 match encoded_text:
     case "1":
         print("Enter a text-file to encode: ")
+        print("-" * PRINT_LINE_WIDTH)
         filename = input()
-        text_file = Encoder(f"assets/{filename}.txt")
+        print("Enter frame rate & pixel size \nEx. 1,5")
         print("-" * PRINT_LINE_WIDTH)
-        print("Enter frame rate: & pixel size: ")
-        print("Ex. 1,5")
-        print("-" * PRINT_LINE_WIDTH)
-        frame_rate, pixel_size = input().split(",")
-        print("-" * PRINT_LINE_WIDTH)
-        text_file.generate_video(filename, int(frame_rate), int(pixel_size))
+        frame_rate, block_size = input().split(",")
+        encoder_instance = Encoder(f"assets/{filename}.txt")
+        encoder_instance.generate_video(
+            output_folder=filename, 
+            frame_rate=int(frame_rate), 
+            BLOCK_SIZE=int(block_size)
+            )
     case "2":
         print("-" * PRINT_LINE_WIDTH)
         print("Enter video title & pixel size: ")
         print("Ex. bee,5")
-        filename, pixel_size = input().split(",")
+        filename, block_size = input().split(",")
         decoder = Decoder(video_filepath=f"results/vids/{filename}.mp4")
-        text = decoder.binary_to_text(int(pixel_size))
+        text = decoder.binary_to_text(int(block_size))
         print("Output: ")
         print(text)
         quit()
@@ -42,7 +44,7 @@ match encoded_text:
         quit()
 
 print("-" * PRINT_LINE_WIDTH)
-print("Would you like to upload the video to YouTube?(Y/N): ")
+print("Would you like to upload the video to YouTube? (Y/N): ")
 upload = input()
 YOUTUBE = True
 
@@ -93,14 +95,14 @@ if YOUTUBE:
     download_video(f"{link}")
 
 print("-" * PRINT_LINE_WIDTH)
-print("Would you like to decode the video to text?(Y/N) (This may take a while if your file is long): ")
+print("Would you like to decode the video to text? (Y/N) (This may take a while if your file is long): ")
 decoding = input()
 
 match decoding:
     case "Y":
         print("-" * PRINT_LINE_WIDTH)
         decoder = Decoder(video_filepath=f"results/vids/{filename}.mp4")
-        text = decoder.binary_to_text(int(pixel_size))
+        text = decoder.binary_to_text(int(block_size))
         print("\n")
         print("Output:\n", text)
     case "N":
@@ -122,4 +124,10 @@ if encoded_text == "2":
             text_file = open(f"{filename}.txt", "w")
             text_file.write(text)
             text_file.close()
+        case "N":
+            print("Quitting...")
+            quit()
+        case _:
+            print("Invalid input")
+            quit()
         
