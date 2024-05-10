@@ -22,10 +22,10 @@ match encoded_text:
         print("-" * PRINT_LINE_WIDTH)
         frame_rate, block_size = input().split(",")
         encoder_instance.generate_video(
-            output_folder=filename, 
-            frame_rate=int(frame_rate), 
-            BLOCK_SIZE=int(block_size)
-            )
+            output_folder=filename,
+            frame_rate=int(frame_rate),
+            BLOCK_SIZE=int(block_size),
+        )
         print("-" * PRINT_LINE_WIDTH)
     case "2":
         print("-" * PRINT_LINE_WIDTH)
@@ -46,7 +46,6 @@ match encoded_text:
         print("Invalid input")
         quit()
 
-print("-" * PRINT_LINE_WIDTH)
 print("Would you like to upload the video to YouTube? (Y/N): ")
 upload = input()
 YOUTUBE = True
@@ -60,10 +59,12 @@ match upload:
         except Exception as e:
             # Handle any other exceptions
             print("An error occurred:", e)
-            print("YouTube upload unsuccessful. Please add your credentials" +
-                  " file into the pix-code directory, as outlined in the README")
+            print(
+                "YouTube upload unsuccessful. Please add your credentials"
+                + " file into the pix-code directory, as outlined in the README"
+            )
             YOUTUBE = False
-        
+
         if YOUTUBE:
             print(YOUTUBE)
             file_path = f"results/vids/{filename}.mp4"
@@ -98,8 +99,10 @@ if YOUTUBE:
     download_video(f"{link}")
 
 print("-" * PRINT_LINE_WIDTH)
-print("Would you like to decode the video to text? (Y/N)" +
-      " (This may take a while if your file is long): ")
+print(
+    "Would you like to decode the video to text? (Y/N)"
+    + " (This may take a while if your file is long): "
+)
 decoding = input()
 
 match decoding:
@@ -134,4 +137,3 @@ if encoded_text == "2":
         case _:
             print("Invalid input")
             quit()
-        
